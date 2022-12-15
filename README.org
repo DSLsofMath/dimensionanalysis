@@ -1,0 +1,11 @@
+* Patrik Jansson: Dimension analysis and graded algebras
++ Talk 2022-11-11 [[https://www.youtube.com/watch?v=a3ily1F3zyA][YouTube video]]
++ at the Agda meeting in Edinburgh.
++ Joint work with Nicola Botta and Guilherme Silva.
++ [[https://patrikja.owlstown.net/posts/1127-first-and-31-st-agda-meetings][Blog post]]
+
+This talk describes work in progress aimed at understanding dimension
+analysis though coding it up using dependent types.
+** Agda version etc.
++ This file loads in Agda 2.6.2.2 with Agda stdlib-1.7
++ It is a literate Agda file with emacs org-mode syntax for outlining.
