@@ -104,9 +104,9 @@ RealPlus3 = Vec Real 3
   per "base dimension".
 *** These systems can be grouped into classes
 + For geometry, just one base dimension of length is needed and the
-  class is usually called just L. 
-+ For kinematics (the class LT) we have a length and a time. 
-+ For mechancics (the class LTM) we have length, time, and mass. 
+  class is usually called just L.
++ For kinematics (the class LT) we have a length and a time.
++ For mechancics (the class LTM) we have length, time, and mass.
 + Etc.
 ** Dimensions and dimension functions
 + Usually dimensions are decribed by monomials: acceleration "has
@@ -118,7 +118,7 @@ RealPlus3 = Vec Real 3
   my height (of dimension L) in meters the value is 1.78 but if we
   divide the unit by 100 (to get cm) my height is measured to 178.
 + In general, if we make the unit of measurement L times smaller, we
-  make the measured height L times bigger. 
+  make the measured height L times bigger.
 + This is usually described as saying that the height is actually
   invariant, but the measured value changes in the opposite direction
   of the measuring rod.
@@ -131,7 +131,7 @@ RealPlus3 = Vec Real 3
   the measured force |M*L/T^2| times bigger.
 ** Physics and dimensions
 + In an equation like |F = m * a| in physics, the dimensions must match
-  up: |dim F = dim (m * a)|. 
+  up: |dim F = dim (m * a)|.
 + Similarly for addition.
 + For multiplication we don't need to require matching
   dimension: |dim| is a homomorphism: |dim (m * a) = dim m * dim a|.
@@ -196,7 +196,7 @@ operations performed on the quantities.
     _^qn_ : Q d -> (n : Nat) -> Q (d ^dn n)
     s ^qn zero   = 1q
     s ^qn suc n  = (s ^qn n) *q s
-        
+
     _^q_ : Q d -> (i : Integer) -> Q (d ^d i)
     s ^q (+ n) = s ^qn n
     s ^q (Integer.negsuc n) = 1q /q (s ^qn (suc n))
@@ -224,7 +224,7 @@ module LTM (S : Set) (rf : RawField S) where
     Dimless  = 0ℤ ∷ 0ℤ ∷ 0ℤ ∷ [] -- zero vector
     _*d_ = _+v_
     _/d_ = _-v_
-    L T M : Dim 
+    L T M : Dim
     L        = 1ℤ ∷ 0ℤ ∷ 0ℤ ∷ [] -- base vectors / base dimensions
     T        = 0ℤ ∷ 1ℤ ∷ 0ℤ ∷ [] -- base vectors / base dimensions
     M        = 0ℤ ∷ 0ℤ ∷ 1ℤ ∷ [] -- base vectors / base dimensions
@@ -236,7 +236,7 @@ module LTM (S : Set) (rf : RawField S) where
   dimstuff = record { LTMDim }
 
   open Quantities dimstuff S public
-  open LTMDim 
+  open LTMDim
 \end{code}
 *** |Q| record type: just a wrapper around a scalar value
 \begin{code}
@@ -318,7 +318,7 @@ Finally we can define the |measure| of a quantity in a system of
 units:
 
 \begin{code}
-  measure : Q d -> SysUnit -> S 
+  measure : Q d -> SysUnit -> S
   measure q su = dimfun (dim q) su *s LTMQ.Q.val q
 \end{code}
 
@@ -351,17 +351,17 @@ module Examples where
 *** Mass and Force
 \begin{code}
   mass : Q M
-  mass = Val 76.0 
+  mass = Val 76.0
 
   Force : Dim
-  Force = M *d Acceleration  
+  Force = M *d Acceleration
   f : Q Force
   f = mass *q g
 \end{code}
 *** Unit conversion (measure)
 \begin{code}
   test1 : Real
-  test1 = measure hei cgs 
+  test1 = measure hei cgs
   check1 : test1 == 178.0
   check1 = refl
   test2 : Real
@@ -372,7 +372,7 @@ module Examples where
 *** Skip Agda TODO
 **** TODO Agda-wise: show-instances?
 + When normalizing, the dimension of a quantity is not very readable:
-+ |Force = + 1 ∷ Integer.negsuc 1 ∷ + 1 ∷ []| 
++ |Force = + 1 ∷ Integer.negsuc 1 ∷ + 1 ∷ []|
 + It would look better as |show Force = L*T^-2*M|.
 + Thus a "standard" system of Show instances would be useful in Agda.
 ** Dimension analysis (Pi theorem example)
@@ -381,11 +381,11 @@ some examples. Time to get to the core of dimension analysis: the Pi
 theorem.
 
 *** Pendulum example intro
-+ Assume we are experimenting with an ideal pendulum: 
-+ a point mass |m| hanging from 
-+ a piece of string of length |x|, 
-+ the time |t| for one period 
-+ when starting from an angle |theta|. 
++ Assume we are experimenting with an ideal pendulum:
++ a point mass |m| hanging from
++ a piece of string of length |x|,
++ the time |t| for one period
++ when starting from an angle |theta|.
 + We want to find how the gravitational constant |g| can be computed
   from the other four parameters.
 
@@ -396,9 +396,9 @@ theorem.
 
 *** Pi theorem for this example
 + The core theorem of dimension analysis says that such a function can
-  be simplified significantly. 
+  be simplified significantly.
 + First, pick three quantities of independent dimension:
-  here |m|, |x|, and |t|. 
+  here |m|, |x|, and |t|.
 + Second, make the remaining quantities dimensionless by combining
   them with monomials in the first three.
 + Here |theta| is already dimensionless, but |g = gravity m x theta t|
@@ -407,11 +407,12 @@ theorem.
   from just |theta| to |a|, and a monomial factor used to translate
   back to a quantity of the correct dimension.
 \begin{code}
-  acc : Q Dimless -> Q Dimless 
+  acc : Q Dimless -> Q Dimless
   gravity : Q M -> Q L -> Q T -> Q Dimless -> Q Acceleration
   gravity m x t theta = monomial  *q  acc theta
-    where  monomial : Q Acceleration -- 
-           monomial = {!!}
+    where  monomial : Q Acceleration --
+--           monomial = {!!} was filled in during the talk
+           monomial = x /q (t ^q 2ℤ)
 \end{code}
 *** Pi theorem implications
 + If we want to figure out the *4-argument* function |gravity| from
@@ -435,6 +436,6 @@ theorem.
 + Other example: tensors are graded by their rank
 *** TODO Library code and paper is work in progress (mostly in Idris).
 *** TODO Multiple grading: |T r (Q d s)| or |Q d (T r s)|?
-+ tensors with rank containing quantities with dimensions? 
++ tensors with rank containing quantities with dimensions?
 + or quantities with dimensions containing tensors with rank?
 + or ...

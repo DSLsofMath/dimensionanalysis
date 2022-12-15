@@ -1,0 +1,3 @@
+name: JanssonDimensions2022  -- source for talk at Agda meeting 2022-11 in Edinburgh
+depend: standard-library-1.7
+include: .
