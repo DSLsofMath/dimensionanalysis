@@ -2,8 +2,8 @@ name: basic
 on: [push]
 jobs:
   check:
-    name: Check JanssonDimensions2022.lagda
-    runs-on: ubuntu-latest # or macOS-latest, or windows-latest
+    name: Check JanssonDimensionsTalk
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: wenkokke/setup-agda@latest
@@ -12,3 +12,5 @@ jobs:
           agda-stdlib-version: '1.7'
       - working-directory: src
         run: agda JanssonDimensions2022.lagda
+      - working-directory: src
+        run: agda JanssonDimensions2023.lagda.tex
