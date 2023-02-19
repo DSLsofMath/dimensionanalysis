@@ -1,7 +1,6 @@
 % -*-Latex-*-
-%let allCode = style==code
 \RequirePackage{amsmath}
-\documentclass{beamer}
+\documentclass[aspectratio=169]{beamer}
 \usetheme{Madrid}
 % Hide navigation symbols
 \setbeamertemplate{navigation symbols}{}
@@ -234,7 +233,7 @@ class is usually called just L.
   is |\ L T M -> L / T ^ 2|. The function describes how the measured
   value of the acceleration changes when we change the units of
   measurements.
-\item My height (of dimension L) has value 1.78 in meters but 178 in
+\item My height (of dimension L) is measured to 1.78 in meters but 178 in
   cm.
 \item In general, if we make the unit of measurement L times smaller,
   we make the measured height L times bigger.
@@ -363,8 +362,8 @@ module LTM (S : Type) (rf : RawField S) where
     _*d_ = _+v_
     _/d_ = _-v_
     Dimless  : Dim
-    Dimless  = ℤ0 ∷ ℤ0 ∷ ℤ0 ∷ [] -- zero vector
-    L T M    : Dim -- base vectors / dimensions
+    Dimless  = ℤ0 ∷ ℤ0 ∷ ℤ0 ∷ []  -- zero vector
+    L T M    : Dim                -- base vectors / dimensions
     L        = ℤ1 ∷ ℤ0 ∷ ℤ0 ∷ []
     T        = ℤ0 ∷ ℤ1 ∷ ℤ0 ∷ []
     M        = ℤ0 ∷ ℤ0 ∷ ℤ1 ∷ []
@@ -407,7 +406,7 @@ The |Q| record type: just a wrapper around a scalar value:
     scaleq s (Val x) = Val (s *s x)
 \end{code}
 
-\pause 
+\pause
 \ldots and |Q| is a graded field (informally - no proofs here)
 \begin{code}
     q1  : Q Dimless
@@ -434,6 +433,7 @@ For the scalars we need an underlying field |S| and we get a field
 back for |Q Dimless| but not for |Q d| for other |d|. But we get (yet
 another) example of an indexed structure: an indexed, or graded, field.
 
+\pause
 Example of why |Q L| is not a field: the multiplication operation
 does not stay within the type:
 
@@ -484,12 +484,11 @@ units:
   measure : Q d -> SysUnit -> S
   measure q su = dimfun (dim q) su *s (LTMQ.val q)
 \end{code}
-(Remember that |val : Q d -> S| extracts the scalar.)
+(Remember that |val : Q d -> S| extracts the scalar inside a quantity.)
 %}
 \end{frame}
 \begin{frame}
-\frametitle{Example quantities}
-To make this a bit more concrete we introduce a few quantities:
+\frametitle{Examples: systems of units and quantities}
 %if allCode
 \subsubsection{Skip module / opens}
 \begin{code}
@@ -501,46 +500,52 @@ module Examples where
   open LTMQ
 \end{code}
 %endif
-\subsubsection{Length and Acceleration}
+%\subsubsection{Length and Acceleration}
+\begin{columns}
+\begin{column}{0.49\textwidth}
 \begin{code}
-  hei : Q L
-  hei = Val 1.78
+  si   : SysUnit   -- m,  second, kg
+  si   =   1.0 ∷ 1.0 ∷    1.0 ∷ []
+  cgs  : SysUnit   -- cm, second, gram
+  cgs  = 100.0 ∷ 1.0 ∷ 1000.0 ∷ []
+\end{code}
+\pause
+\vspace*{-1cm}
+\begin{code}
+  mass   : Q M
+  mass   = Val 76.0
+  hei    : Q L
+  hei    = Val 1.78
 
+  test1   : Real
+  test1   = measure hei cgs
+  check1  : test1 == 178.0
+  check1  = refl
+\end{code}
+\end{column}
+\begin{column}{0.49\textwidth}
+\pause
+% \frametitle{Mass and Force}
+\begin{code}
   Acceleration : Dim
   Acceleration = L /d (T ^d ℤ2)
   g : Q Acceleration
   g = Val 9.82
-
-  si   : SysUnit   -- m, kg, second
-  si   =   1.0 ∷ 1.0 ∷    1.0 ∷ []
-  cgs  : SysUnit   -- cm, gram, second
-  cgs  = 100.0 ∷ 1.0 ∷ 1000.0 ∷ []
-\end{code}
-\end{frame}
-\begin{frame}
-\frametitle{Mass and Force}
-\begin{code}
-  mass   : Q M
-  mass   = Val 76.0
-
   Force  : Dim
   Force  = M *d Acceleration
   f  : Q Force
   f  = mass *q g
 \end{code}
-
 \pause
 Unit conversion (measure)
 \begin{code}
-  test1 : Real
-  test1 = measure hei cgs
-  check1 : test1 == 178.0
-  check1 = refl
-  test2 : Real
-  test2 = measure f cgs
-  check2 : test2 == 7.4632e7
-  check2 = refl
+  test2   : Real
+  test2   = measure f cgs
+  check2  : test2 == 76000.0 *s 982.0
+  check2  = refl
 \end{code}
+\end{column}
+\end{columns}
 \end{frame}
 \begin{frame}
 \frametitle{Dimension analysis (Pi theorem example)}
@@ -586,7 +591,7 @@ from the other four parameters.
   acc : Q Dimless -> Q Dimless
   gravity : Q M -> Q L -> Q T -> Q Dimless -> Q Acceleration
   gravity m x t theta = monomial  *q  acc theta
-    where  monomial : Q Acceleration 
+    where  monomial : Q Acceleration
            monomial = x /q (t ^q ℤ2) -- The type dictates the value.
 \end{code}
 \end{frame}
@@ -615,9 +620,9 @@ from the other four parameters.
 \item Dimension analysis can be usefully expressed done with dep. types
 \item Physical quantities form a field graded by an abelian group of
   dimensions.
-\item Other example: tensors are graded by their rank
-\item TODO: Library code and paper is work in progress (mostly in Idris).
-\item TODO: Multiple grading: |T r (Q d s)| or |Q d (T r s)|?
+\item Other example: tensors are graded by their order
+\item Library code and paper is work in progress (mostly in Idris).
+\item Multiple grading: |T r (Q d s)| or |Q d (T r s)|?
   \begin{itemize}
   \item tensors with rank containing quantities with dimensions?
   \item or quantities with dimensions containing tensors with rank?
