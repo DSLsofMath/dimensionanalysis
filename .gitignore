@@ -1,3 +1,11 @@
 *.agdai
 MAlonzo/**
 *~
+/src/JanssonDimensions2023.aux
+/src/JanssonDimensions2023.fdb_latexmk
+/src/JanssonDimensions2023.fls
+/src/JanssonDimensions2023.log
+/src/JanssonDimensions2023.out
+/src/JanssonDimensions2023.pdf
+/src/JanssonDimensions2023.ptb
+/src/JanssonDimensions2023.tex
