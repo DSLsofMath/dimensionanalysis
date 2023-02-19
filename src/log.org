@@ -1,0 +1,17 @@
+* 2023-02-19: Preparing another talk on the dimensional analysis
+
+** Converting 0Z, etc.
++ lhs2TeX parses 0Z as two tokens which makes the formatting bad.
++ Solution: rename them in the Agda file, then use %format directives.
++ Step 1: Collect all (visible) uses and rename them
+  0Q -> q0
+  1q -> q1
+  0ℤ -> ℤ0
+  1ℤ -> ℤ1
+  2ℤ -> ℤ2
++ Step 2: Add format directives
+%format q0 = 0 "_{" q "}"
+%format q1 = 1 "_{" q "}"
+%format ℤ0 = 0 "_{" ℤ "}"
+%format ℤ1 = 1 "_{" ℤ "}"
+%format ℤ2 = 2 "_{" ℤ "}"

@@ -41,6 +41,7 @@
 %format /q = "\mathbin{{/\!}_q}"
 %format _^q_ = "\unopun{" ^q "}"
 %format ^q = "\mathbin{\hat{\;}^q}"
+%format scaleq = scale "_q"
 %format _+v_ = "\unopun{" +v "}"
 %format +v = "\mathbin{{+\!}_v}"
 %format _-v_ = "\unopun{" -v "}"
@@ -49,8 +50,17 @@
 %format +s = "\mathbin{{+\!}_s}"
 %format _*s_ = "\unopun{" *s "}"
 %format *s = "\mathbin{{*\!}_s}"
-% %format ^ = "^"
-% %format 0ℤ = 0 "_{" ℤ "}"
+%format _/s_ = "\unopun{" /s "}"
+%format /s = "\mathbin{{/\!}_s}"
+%format d1 = "d_1"
+%format d2 = "d_2"
+%format q0 = 0 "_{" q "}"
+%format q1 = 1 "_{" q "}"
+%format s0 = 0 "_{" s "}"
+%format s1 = 1 "_{" s "}"
+%format ℤ0 = 0 "_{" ℤ "}"
+%format ℤ1 = 1 "_{" ℤ "}"
+%format ℤ2 = 2 "_{" ℤ "}"
 % the `doubleequals' macro is due to Jeremy Gibbons
 \def\doubleequals{\mathrel{\unitlength 0.01em
   \begin{picture}(78,40)
@@ -98,12 +108,13 @@ open import Relation.Nullary renaming (¬_ to Not)
 Type = Set
 Type1 = Set1
 
-import Data.Integer using (ℤ; 0ℤ; 1ℤ; -1ℤ; +0; +_; -[1+_])
+import Data.Integer using (ℤ; +0; +_; -[1+_])
+                    renaming (0ℤ to ℤ0; 1ℤ to ℤ1)
 open Data.Integer
 Integer : Type
 Integer = ℤ
-2ℤ : ℤ
-2ℤ = + 2
+ℤ2 : ℤ
+ℤ2 = + 2
 \end{code}
 \subsubsection{Lift |Ring| operations to vectors}
 \label{sec:org1dcf010}
@@ -168,21 +179,21 @@ open Data.Float.Base renaming (_*_ to _*r_; _+_ to _+r_; _-_ to _-r_; _÷_ to _/
 record RawField (S : Type) : Type where
   -- TODO redo with reuse of Ring structure?
   field
-    0s 1s : S
+    s0 s1 : S
     _+s_ : S -> S -> S
     _*s_ : S -> S -> S
     _/s_ : S -> S -> S
 
   _^_ : S → Nat → S
-  s ^ zero   = 1s
+  s ^ zero   = s1
   s ^ suc n  = (s ^ n) *s s
 
   pow : S -> ℤ -> S
   pow s  ( + n )  =        s ^ n
-  pow s -[1+ n ]  = 1s /s (s ^ (suc n))
+  pow s -[1+ n ]  = s1 /s (s ^ (suc n))
 
 rfReal : RawField Real
-rfReal = record {0s = 0.0; 1s = 1.0; _+s_ = _+r_; _*s_ = _*r_; _/s_ = _/r_}
+rfReal = record {s0 = 0.0; s1 = 1.0; _+s_ = _+r_; _*s_ = _*r_; _/s_ = _/r_}
 
 RealPlus3 : Type
 RealPlus3 = Vec Real 3
@@ -240,7 +251,7 @@ dim F = dim (m * a)
 \end{spec}
 \item Similarly for addition.
 \item For multiplication we don't need to require matching
-dimension: |dim| is a homomorphism: |dim (m * a) = dim m * dim a|.
+dimension: |dim| is a homomorphism: |dim (m * a) = dim m *d dim a|.
 \item Now, how do we type this? We clearly need to be able to multiply and
 divide dimensions, and we also need a value to denote
 "dimensionless".
@@ -282,17 +293,17 @@ module Quantities (dimstuff : DimStuff) (S : Type) where
   variable d d1 d2 : Dim
   record Qstuff : Type1 where
     field
-      Q      : Dim -> Type
-      dim    : Q d -> Dim
+      Q     : Dim -> Type
+      dim   : Q d -> Dim
 
-      0Q     : Q d
-      _+q_   : Q d  -> Q d  -> Q d
-      scale  : S    -> Q d  -> Q d
+      q0      : Q d
+      _+q_    : Q d  -> Q d  -> Q d
+      scaleq  : S    -> Q d  -> Q d
 \end{code}
 \subsection{Quantities are almost a field}
 \label{sec:org0c728a2}
 \begin{code}
-      1q    : Q Dimless
+      q1    : Q Dimless
       _*q_  : Q d1 -> Q d2 -> Q (d1 *d d2)
       _/q_  : Q d1 -> Q d2 -> Q (d1 /d d2)
 \end{code}
@@ -309,12 +320,12 @@ operations performed on the quantities.
     infixl 6 _+q_
 
     _^qn_ : Q d -> (n : Nat) -> Q (d ^dn n)
-    s ^qn zero   = 1q
+    s ^qn zero   = q1
     s ^qn suc n  = (s ^qn n) *q s
 
     _^q_ : Q d -> (i : ℤ) -> Q (d ^d i)
     s ^q  ( + n )  = s ^qn n
-    s ^q -[1+ n ]  = 1q /q (s ^qn (suc n))
+    s ^q -[1+ n ]  = q1 /q (s ^qn (suc n))
   open Qstuff
 \end{code}
 %endif
@@ -341,14 +352,14 @@ module LTM (S : Type) (rf : RawField S) where
 \label{sec:orgef10fd0}
 \begin{code}
     Dim = Vec ℤ 3
-    Dimless : Dim
-    Dimless  = 0ℤ ∷ 0ℤ ∷ 0ℤ ∷ [] -- zero vector
     _*d_ = _+v_
     _/d_ = _-v_
-    L T M : Dim -- base vectors / base dimensions
-    L        = 1ℤ ∷ 0ℤ ∷ 0ℤ ∷ []
-    T        = 0ℤ ∷ 1ℤ ∷ 0ℤ ∷ []
-    M        = 0ℤ ∷ 0ℤ ∷ 1ℤ ∷ []
+    Dimless : Dim
+    Dimless  = ℤ0 ∷ ℤ0 ∷ ℤ0 ∷ [] -- zero vector
+    L T M : Dim -- base vectors / dimensions
+    L        = ℤ1 ∷ ℤ0 ∷ ℤ0 ∷ []
+    T        = ℤ0 ∷ ℤ1 ∷ ℤ0 ∷ []
+    M        = ℤ0 ∷ ℤ0 ∷ ℤ1 ∷ []
 \end{code}
 \subsection{Quantities}
 \label{sec:org52ece7d}
@@ -378,18 +389,18 @@ module LTM (S : Type) (rf : RawField S) where
 \subsubsection{|Q d| is a 1D vector space for each |d : Dim|}
 \label{sec:orgf183c4d}
 \begin{code}
-    0Q : Q d
-    0Q = Val 0s
+    q0 : Q d
+    q0 = Val s0
     _+q_ : Q d  -> Q d  -> Q d
     Val x +q Val y = Val (x +s y)
-    scale : S -> Q d -> Q d
-    scale s (Val x) = Val (s *s x)
+    scaleq : S -> Q d -> Q d
+    scaleq s (Val x) = Val (s *s x)
 \end{code}
 \subsubsection{|Q| is a graded field (informally - no proofs)}
 \label{sec:orgb5405e9}
 \begin{code}
-    1q  : Q Dimless
-    1q = Val 1s
+    q1  : Q Dimless
+    q1 = Val s1
     _*q_ : Q d1 -> Q d2 -> Q (d1 *d d2)
     Val x *q Val y = Val (x *s y)
     _/q_ : Q d1 -> Q d2 -> Q (d1 /d d2)
@@ -446,7 +457,7 @@ units.
 \label{sec:orgd24d664}
 \begin{code}
   dimfun : Dim -> (SysUnit -> S)
-  dimfun d su = foldr _*s_ 1s (zipWith pow su d)
+  dimfun d su = foldr _*s_ s1 (zipWith pow su d)
 \end{code}
 
 Finally we can define the |measure| of a quantity in a system of
@@ -479,7 +490,7 @@ module Examples where
   hei = Val 1.78
 
   Acceleration : Dim
-  Acceleration = L /d (T ^d 2ℤ)
+  Acceleration = L /d (T ^d ℤ2)
   g : Q Acceleration
   g = Val 9.82
 
@@ -544,7 +555,7 @@ here |m|, |x|, and |t|.
 \item Second, make the remaining quantities dimensionless by combining
 them with monomials in the first three.
 \item Here |theta| is already dimensionless, but |g = gravity m x theta t|
-is replaced by |a = g *q (t ^q 2ℤ) /q x : Q Dimless|.
+is replaced by |a = g *q (t ^q ℤ2) /q x : Q Dimless|.
 \item Finally, the function |gravity| is factored into a function |acc|
 from just |theta| to |a|, and a monomial factor used to translate
 back to a quantity of the correct dimension.
@@ -553,8 +564,8 @@ back to a quantity of the correct dimension.
   acc : Q Dimless -> Q Dimless
   gravity : Q M -> Q L -> Q T -> Q Dimless -> Q Acceleration
   gravity m x t theta = monomial  *q  acc theta
-    where  monomial : Q Acceleration --
-           monomial = {!!} -- TODO fill in during the talk
+    where  monomial : Q Acceleration 
+           monomial = x /q (t ^q ℤ2) -- The type dictates the value.
 \end{code}
 \subsubsection{Pi theorem implications}
 \label{sec:orgb2d1435}
@@ -571,7 +582,7 @@ small angles |theta|.
   twoPiSq : Q Dimless
   acc theta = twoPiSq
 
-  twoPiSq = scale 39.5 1q
+  twoPiSq = scaleq 39.5 q1
 \end{code}
 
 \subsection{Summary \& future work}
