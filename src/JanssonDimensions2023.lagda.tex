@@ -1,14 +1,22 @@
 % -*-Latex-*-
+%let allCode = style==code
 \RequirePackage{amsmath}
-\documentclass{article}
+\documentclass{beamer}
+\usetheme{Madrid}
+% Hide navigation symbols
+\setbeamertemplate{navigation symbols}{}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{graphicx}
 \usepackage{hyperref}
+\hypersetup{pdfpagemode={FullScreen}}
 \usepackage{newunicodechar}
 \input{newunicodedefs}
-\author{Patrik Jansson}
+\author[Jansson]{Patrik Jansson}
 \date{\today}
+\institute[FP unit, Chalmers]{Functional Programming unit, Chalmers University of Technology}
+\date{2023-02-28}
+%TODO perhaps \titlegraphic{\vspace{-0.5cm}\includegraphics[width=0.6\textwidth]{}}
 \title{Dimensional Analysis and Graded Algebras}
 \hypersetup{
  pdfauthor={Patrik Jansson},
@@ -16,6 +24,8 @@
  pdfkeywords={},
  pdfsubject={},
  pdflang={English}}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
 %include lhs2TeX.fmt
 %include lhs2TeX.sty
 %include polycode.fmt
@@ -70,12 +80,14 @@
 %% If you remove the %format == command the lhs2TeX default yields ≡, which can be a problem
 %format ==   = "\doubleequals"
 \begin{document}
-\section{Patrik Jansson: Dimension analysis and graded algebras}
-\label{sec:org7abdf0f}
+\begin{frame}
+  \maketitle
+  Joint work with Nicola Botta and Guilherme Silva.
+\end{frame}
+\begin{frame}
+\frametitle{Dimension analysis and graded algebras: Intro}
 \begin{itemize}
-\item Prel. talk 2023-02-21
-\item at the \href{https://ifipwg21wiki.cs.kuleuven.be/IFIP21/OnlineFeb23}{online meeting} of WG 2.1 on Algorithmic Languages and Calculi
-\item Joint work with Nicola Botta and Guilherme Silva.
+\item Talk at the \href{https://ifipwg21wiki.cs.kuleuven.be/IFIP21/OnlineFeb23}{2023-02 online meeting} of WG 2.1 on Algorithmic Languages and Calculi.
 \item Abstract:
 This talk describes work in progress aimed at understanding dimension analysis
 though coding it up using dependent types (in Agda). I will talk you through
@@ -87,19 +99,16 @@ experiment.
 that.
 \item Source code: \url{https://github.com/DSLsofMath/dimensionanalysis}
 \end{itemize}
-%if False
+%if allCode
 \subsection{Agda version etc.}
-\label{sec:org0a55a2b}
 \begin{itemize}
 \item This file loads in Agda 2.6.2.2 with Agda stdlib-1.7
 \item It is a literate Agda file with embedded LaTeX code.
 \end{itemize}
 %endif
-%if False
+%if allCode
 \subsection{Skip some imports and setup}
-\label{sec:orga01e249}
 \subsubsection{Basic imports: equality, integers}
-\label{sec:org28c6c1b}
 \begin{code}
 module JanssonDimensions2023 where
 open Agda.Primitive using (lzero)
@@ -117,7 +126,6 @@ Integer = ℤ
 ℤ2 = + 2
 \end{code}
 \subsubsection{Lift |Ring| operations to vectors}
-\label{sec:org1dcf010}
 \begin{code}
 import Algebra
 Ring = Algebra.Ring lzero lzero
@@ -147,7 +155,6 @@ module VectScope (r : Ring) where
   x *v v =  map (x *_) v
 \end{code}
 \subsubsection{Postulate a Ring of reals}
-\label{sec:org65e7a7d}
 \begin{itemize}
 \item implemented using |module Data.Float| and some postulates
 \item \textbf{NOTE} - this is not true but used for pragmatic reasons
@@ -174,7 +181,6 @@ RealRing = record { RealRingPostulates }
 open Data.Float.Base renaming (_*_ to _*r_; _+_ to _+r_; _-_ to _-r_; _÷_ to _/r_)
 \end{code}
 \subsubsection{Raw Field record type + Real field record}
-\label{sec:org04f9479}
 \begin{code}
 record RawField (S : Type) : Type where
   -- TODO redo with reuse of Ring structure?
@@ -199,17 +205,18 @@ RealPlus3 : Type
 RealPlus3 = Vec Real 3
 \end{code}
 %endif
-\subsection{Physical quantities and systems of units}
-\label{sec:orgb97e3b3}
+\end{frame}
+\begin{frame}
+  \frametitle{Physical quantities and systems of units}
 \begin{itemize}
-\item We can assign a "dimension" to each physical quantity:
+\item We can assign a ``dimension'' to each physical quantity:
 informally |dim : Q -> D| (later an indexed type |Q d|).
 \item Physical quantities like length, speed, force, etc. are usually
 measured with respect to a system of units of measurement, one unit
-per "base dimension".
-\end{itemize}
-\subsubsection{These systems can be grouped into classes}
-\label{sec:org2870a1b}
+per ``base dimension''.
+
+\pause
+\item These systems can be grouped into classes
 \begin{itemize}
 \item For geometry, just one base dimension of length is needed and the
 class is usually called just L.
@@ -217,47 +224,49 @@ class is usually called just L.
 \item For mechancics (the class LTM) we have length, time, and mass.
 \item Etc.
 \end{itemize}
-\subsection{Dimensions and dimension functions}
-\label{sec:org5f28f0f}
-\begin{itemize}
-\item Usually dimensions are decribed by monomials: acceleration "has
-dimension |L / T ^ 2|". The formal reading is that the dimension
-\textbf{function} is |\L T M -> L / T ^ 2|. This function describes how the
-measured value of the acceleration changes when we change the units
-of measurements.
-\item If we start with a simpler case it is easier to see: if we measure
-my height (of dimension L) in meters the value is 1.78 but if we
-divide the unit by 100 (to get cm) my height is measured to 178.
-\item In general, if we make the unit of measurement L times smaller, we
-make the measured height L times bigger.
-\item This is usually described as saying that the height is actually
-invariant, but the measured value changes in the opposite direction
-of the measuring rod.
-\item This simplest (linear scaling) relation holds for quantities of one
-of the base dimensions, but changes if we move to derived dimensions
-like that for area or acceleration.
-\item In general, if we make the unit of length |L| times smaller, the
-unit of time |T| times smaller and the unit of mass |M| times
-smaller, the measuread acceleration becomes |L / T ^ 2| times bigger and
-the measured force |M * L / T ^ 2| times bigger.
 \end{itemize}
-\subsection{Physics and dimensions}
-\label{sec:orgfce6857}
+\end{frame}
+\begin{frame}
+\frametitle{Dimensions and dimension functions}
 \begin{itemize}
-\item In an equation like |F = m * a| (force equals mass times
-acceleration) in physics, the dimensions must match up:
+\item Informal example: acceleration ``has dimension \(L /
+  T^2\)''. Formal reading: the \textbf{dimension function}
+  is |\ L T M -> L / T ^ 2|. The function describes how the measured
+  value of the acceleration changes when we change the units of
+  measurements.
+\item My height (of dimension L) has value 1.78 in meters but 178 in
+  cm.
+\item In general, if we make the unit of measurement L times smaller,
+  we make the measured height L times bigger.
+\item The height is actually invariant, but the measured value changes
+  in the opposite direction of the measuring rod.
+\item This simplest (linear scaling) relation holds for quantities of
+  one of the base dimensions, but changes if we move to derived
+  dimensions like that for area or acceleration.
+\item In general, if we make the unit of length |L| times smaller, the
+  unit of time |T| times smaller and the unit of mass |M| times
+  smaller, the measuread acceleration becomes |L / T ^ 2| times bigger
+  and the measured force |M * L / T ^ 2| times bigger.
+\end{itemize}
+\end{frame}
+\begin{frame}
+  \frametitle{Physics and dimensions}
+\begin{itemize}
+\item In an equation like |F = m * a| %(force equals mass times acceleration)
+  in physics, the dimensions must match:
 \begin{spec}
 dim F = dim (m * a)
 \end{spec}
 \item Similarly for addition.
-\item For multiplication we don't need to require matching
-dimension: |dim| is a homomorphism: |dim (m * a) = dim m *d dim a|.
-\item Now, how do we type this? We clearly need to be able to multiply and
-divide dimensions, and we also need a value to denote
-"dimensionless".
+\item For multiplication we don't need to require matching dimension:
+  |dim| is a homomorphism: |dim (m * a) = dim m *d dim a|.
+\item Now, how do we type this? We clearly need to be able to multiply
+  and divide dimensions, and we also need a value to denote
+  ``dimensionless''.
 \end{itemize}
-\subsubsection{DimStuff}
-\label{sec:orgb0d530a}
+\end{frame}
+\begin{frame}
+\frametitle{DimStuff}
 \begin{code}
 record DimStuff : Type1 where
   field
@@ -269,9 +278,8 @@ record DimStuff : Type1 where
   _^d_ : Dim -> ℤ -> Dim
 \end{code}
 (We will get back to laws later, and to concrete implementations.)
-%if False
+%if allCode
 \subsubsection{Skip details (exponentiation)}
-\label{sec:org8b0821f}
 \begin{code}
   _^dn_ : Dim -> Nat -> Dim
   d ^dn zero   = Dimless
@@ -281,9 +289,10 @@ record DimStuff : Type1 where
   d ^d -[1+ n ]  = Dimless /d (d ^dn suc n)
 \end{code}
 %endif
-\subsection{Quantities indexed by dimensions}
-\label{sec:org0cd7662}
-Then we need to make sure the type for "quantities" is indexed by
+\end{frame}
+\begin{frame}
+\frametitle{Quantities indexed by dimensions}
+Then we need to make sure the type for ``quantities'' is indexed by
 dimensions. We assume a type for dimensions, and a type of
 scalars |S|.
 \begin{code}
@@ -300,8 +309,9 @@ module Quantities (dimstuff : DimStuff) (S : Type) where
       _+q_    : Q d  -> Q d  -> Q d
       scaleq  : S    -> Q d  -> Q d
 \end{code}
-\subsection{Quantities are almost a field}
-\label{sec:org0c728a2}
+\end{frame}
+\begin{frame}
+\frametitle{Quantities are almost a field}
 \begin{code}
       q1    : Q Dimless
       _*q_  : Q d1 -> Q d2 -> Q (d1 *d d2)
@@ -311,9 +321,8 @@ module Quantities (dimstuff : DimStuff) (S : Type) where
 Here we see that the value of the dimension index tracks the
 operations performed on the quantities.
 
-%if False
+%if allCode
 \subsubsection{Skip (fixities, exponentiation)}
-\label{sec:orgd136fdd}
 \begin{code}
     infixl 7 _*q_
     infixl 7 _/q_
@@ -329,17 +338,16 @@ operations performed on the quantities.
   open Qstuff
 \end{code}
 %endif
-\subsection{Dimension structure}
-\label{sec:orgd044122}
-The algebraic structures at play for the dimensions part is a group:
-and we can use a vector of integers to keep track of the exponents of
+\end{frame}
+\begin{frame}
+\frametitle{Dimension structure}
+The algebraic structures at play for the dimensions part is a group.
+And we can use a vector of integers to keep track of the exponents of
 the base dimensions:
 
-\subsection{Concrete example: the LTM class}
-\label{sec:org58f9714}
-%if False
+\frametitle{Concrete example: the LTM class}
+%if allCode
 \subsubsection{Skip module header / imports}
-\label{sec:orgc1be1b5}
 \begin{code}
 module LTM (S : Type) (rf : RawField S) where
   open RawField rf public
@@ -348,24 +356,24 @@ module LTM (S : Type) (rf : RawField S) where
     open module V = VectScope +-*-ring public
 \end{code}
 %endif
-\subsubsection{LTM Dim implementation example}
-\label{sec:orgef10fd0}
+
+%\frametitle{LTM Dim implementation example}
 \begin{code}
     Dim = Vec ℤ 3
     _*d_ = _+v_
     _/d_ = _-v_
-    Dimless : Dim
+    Dimless  : Dim
     Dimless  = ℤ0 ∷ ℤ0 ∷ ℤ0 ∷ [] -- zero vector
-    L T M : Dim -- base vectors / dimensions
+    L T M    : Dim -- base vectors / dimensions
     L        = ℤ1 ∷ ℤ0 ∷ ℤ0 ∷ []
     T        = ℤ0 ∷ ℤ1 ∷ ℤ0 ∷ []
     M        = ℤ0 ∷ ℤ0 ∷ ℤ1 ∷ []
 \end{code}
-\subsection{Quantities}
-\label{sec:org52ece7d}
-%if False
+\end{frame}
+\begin{frame}
+\frametitle{Implementing physical quantities}
+%if allCode
 \subsubsection{Skip details (module end + opens)}
-\label{sec:org22e4838}
 \begin{code}
   dimstuff : DimStuff
   dimstuff = record { LTMDim }
@@ -374,8 +382,7 @@ module LTM (S : Type) (rf : RawField S) where
   open LTMDim
 \end{code}
 %endif
-\subsubsection{|Q| record type: just a wrapper around a scalar value}
-\label{sec:org235f1bd}
+The |Q| record type: just a wrapper around a scalar value:
 \begin{code}
   module LTMQ where
     record Q (d : Dim) : Type where
@@ -386,18 +393,22 @@ module LTM (S : Type) (rf : RawField S) where
     dim : Q d -> Dim
     dim {d} _ = d
 \end{code}
-\subsubsection{|Q d| is a 1D vector space for each |d : Dim|}
-\label{sec:orgf183c4d}
+\end{frame}
+\begin{frame}
+\frametitle{|Q d| is a 1D vector space for each |d : Dim|}
 \begin{code}
     q0 : Q d
     q0 = Val s0
+
     _+q_ : Q d  -> Q d  -> Q d
     Val x +q Val y = Val (x +s y)
+
     scaleq : S -> Q d -> Q d
     scaleq s (Val x) = Val (s *s x)
 \end{code}
-\subsubsection{|Q| is a graded field (informally - no proofs)}
-\label{sec:orgb5405e9}
+
+\pause 
+\ldots and |Q| is a graded field (informally - no proofs here)
 \begin{code}
     q1  : Q Dimless
     q1 = Val s1
@@ -406,9 +417,8 @@ module LTM (S : Type) (rf : RawField S) where
     _/q_ : Q d1 -> Q d2 -> Q (d1 /d d2)
     Val x /q Val y = Val (x /s y)
 \end{code}
-%if False
+%if allCode
 \subsubsection{Skip (module end, open)}
-\label{sec:orgcc8d37a}
 \begin{code}
   qstuff : Qstuff
   qstuff = record { LTMQ }
@@ -416,8 +426,10 @@ module LTM (S : Type) (rf : RawField S) where
 \end{code}
 %endif
 
-\subsection{Discussion: field or not a field?}
-\label{sec:orgb7e65ef}
+\end{frame}
+\begin{frame}
+\frametitle{Discussion: field or not a field?}
+
 For the scalars we need an underlying field |S| and we get a field
 back for |Q Dimless| but not for |Q d| for other |d|. But we get (yet
 another) example of an indexed structure: an indexed, or graded, field.
@@ -430,14 +442,14 @@ does not stay within the type:
   mul x y = x *q y
 \end{code}
 
-\subsection{Measuring quantities}
-\label{sec:org89b80dd}
+\end{frame}
+\begin{frame}
+\frametitle{Measuring quantities}
 
 There is one operation missing from |Q d|: measuring the quantity in a
 particular system of units. A system of units consists of one scale
 factor for each base dimension.
 \subsubsection{System of units}
-\label{sec:orge6bd6ee}
 \begin{code}
   SysUnit : Type
   SysUnit = Vec S 3   -- for the |LTM| class with |n = 3|
@@ -448,32 +460,38 @@ We will later implement these two examples:
   cgs  : SysUnit  -- cm, gram, second
 \end{spec}
 
-Now we can interpret a "syntactic dimension" (a vector of exponents of
-the base dimensions) as its "dimension function" - the corresponding
+Now we can interpret a ``syntactic dimension'' (a vector of exponents of
+the base dimensions) as its ``dimension function'' - the corresponding
 monomial which computes the change in measured value for a change in
 units.
+\end{frame}
 
-\subsubsection{Dimension function and measure implemented}
-\label{sec:orgd24d664}
+\begin{frame}
+\frametitle{Dimension function and |measure| implemented}
 \begin{code}
   dimfun : Dim -> (SysUnit -> S)
   dimfun d su = foldr _*s_ s1 (zipWith pow su d)
 \end{code}
 
+\pause
+
 Finally we can define the |measure| of a quantity in a system of
 units:
 
+%{
+%format LTMQ.val = val
 \begin{code}
   measure : Q d -> SysUnit -> S
   measure q su = dimfun (dim q) su *s (LTMQ.val q)
 \end{code}
-
-\subsection{Example quantities}
-\label{sec:org16b660b}
+(Remember that |val : Q d -> S| extracts the scalar.)
+%}
+\end{frame}
+\begin{frame}
+\frametitle{Example quantities}
 To make this a bit more concrete we introduce a few quantities:
-%if False
+%if allCode
 \subsubsection{Skip module / opens}
-\label{sec:orgbffed95}
 \begin{code}
 module Examples where
   open LTM Real rfReal
@@ -484,7 +502,6 @@ module Examples where
 \end{code}
 %endif
 \subsubsection{Length and Acceleration}
-\label{sec:orgbce8d66}
 \begin{code}
   hei : Q L
   hei = Val 1.78
@@ -494,24 +511,26 @@ module Examples where
   g : Q Acceleration
   g = Val 9.82
 
-  si : SysUnit   -- m, kg, second
-  si  =   1.0 ∷ 1.0 ∷    1.0 ∷ []
-  cgs : SysUnit  -- cm, gram, second
-  cgs = 100.0 ∷ 1.0 ∷ 1000.0 ∷ []
+  si   : SysUnit   -- m, kg, second
+  si   =   1.0 ∷ 1.0 ∷    1.0 ∷ []
+  cgs  : SysUnit   -- cm, gram, second
+  cgs  = 100.0 ∷ 1.0 ∷ 1000.0 ∷ []
 \end{code}
-\subsubsection{Mass and Force}
-\label{sec:org64c2be3}
+\end{frame}
+\begin{frame}
+\frametitle{Mass and Force}
 \begin{code}
-  mass : Q M
-  mass = Val 76.0
+  mass   : Q M
+  mass   = Val 76.0
 
-  Force : Dim
-  Force = M *d Acceleration
-  f : Q Force
-  f = mass *q g
+  Force  : Dim
+  Force  = M *d Acceleration
+  f  : Q Force
+  f  = mass *q g
 \end{code}
-\subsubsection{Unit conversion (measure)}
-\label{sec:org33dd6cb}
+
+\pause
+Unit conversion (measure)
 \begin{code}
   test1 : Real
   test1 = measure hei cgs
@@ -522,20 +541,22 @@ module Examples where
   check2 : test2 == 7.4632e7
   check2 = refl
 \end{code}
-\subsection{Dimension analysis (Pi theorem example)}
-\label{sec:orgbf60df1}
+\end{frame}
+\begin{frame}
+\frametitle{Dimension analysis (Pi theorem example)}
 OK, now we have dimensions, quantities, the dimension function and
 some examples. Time to get to the core of dimension analysis: the Pi
 theorem.
 
 \subsubsection{Pendulum example intro}
-\label{sec:org8d866e3}
 \begin{itemize}
 \item Assume we are experimenting with an ideal pendulum:
-\item a point mass |m| hanging from
-\item a piece of string of length |x|,
-\item the time |t| for one period
-\item when starting from an angle |theta|.
+  \begin{itemize}
+  \item a point mass |m| hanging from
+  \item a piece of string of length |x|,
+  \item the time |t| for one period
+  \item when starting from an angle |theta|.
+  \end{itemize}
 \item We want to find how the gravitational constant |g| can be computed
 from the other four parameters.
 \end{itemize}
@@ -545,20 +566,21 @@ from the other four parameters.
   gravity m x t theta = ?
 \end{spec}
 
-\subsubsection{Pi theorem for this example}
-\label{sec:org4a22469}
+\end{frame}
+\begin{frame}
+\frametitle{Pi theorem for this example}
 \begin{itemize}
-\item The core theorem of dimension analysis says that such a function can
-be simplified significantly.
-\item First, pick three quantities of independent dimension:
-here |m|, |x|, and |t|.
+\item The core theorem of dimension analysis says that such a function
+  can be simplified significantly.
+\item First, pick three quantities of independent dimension: here |m|,
+  |x|, |t|.
 \item Second, make the remaining quantities dimensionless by combining
-them with monomials in the first three.
-\item Here |theta| is already dimensionless, but |g = gravity m x theta t|
-is replaced by |a = g *q (t ^q ℤ2) /q x : Q Dimless|.
-\item Finally, the function |gravity| is factored into a function |acc|
-from just |theta| to |a|, and a monomial factor used to translate
-back to a quantity of the correct dimension.
+  them with monomials in the first three.
+\item Here |theta| is already dimensionless, but |g = gravity m x
+  theta t| is replaced by |a = g *q (t ^q ℤ2) /q x : Q Dimless|.
+\item Finally, the function |gravity| is factored into a function
+  |acc| from just |theta| to |a|, and a monomial factor used to
+  translate back to a quantity of the correct dimension.
 \end{itemize}
 \begin{code}
   acc : Q Dimless -> Q Dimless
@@ -567,15 +589,16 @@ back to a quantity of the correct dimension.
     where  monomial : Q Acceleration 
            monomial = x /q (t ^q ℤ2) -- The type dictates the value.
 \end{code}
-\subsubsection{Pi theorem implications}
-\label{sec:orgb2d1435}
+\end{frame}
+\begin{frame}
+\frametitle{Pi theorem implications}
 \begin{itemize}
-\item If we want to figure out the \textbf{4-argument} function |gravity| from
-experiments, we actually only need to figure out the \textbf{1-argument}
-function |acc|.
-\item Experiments (or numerical simulations with the proper differential
-equations) further show that the remaining function is constant for
-small angles |theta|.
+\item If we want to figure out the \textbf{4-argument} function
+  |gravity| from experiments, we actually only need to figure out the
+  \textbf{1-argument} function |acc|.
+\item Experiments (or numerical simulations with the proper
+  differential equations) further show that the remaining function is
+  constant for small angles |theta|.
 \end{itemize}
 
 \begin{code}
@@ -585,21 +608,21 @@ small angles |theta|.
   twoPiSq = scaleq 39.5 q1
 \end{code}
 
-\subsection{Summary \& future work}
-\label{sec:org51e8638}
+\end{frame}
+\begin{frame}
+\frametitle{Summary \& future work}
 \begin{itemize}
 \item Dimension analysis can be usefully expressed done with dep. types
 \item Physical quantities form a field graded by an abelian group of
-dimensions.
+  dimensions.
 \item Other example: tensors are graded by their rank
+\item TODO: Library code and paper is work in progress (mostly in Idris).
+\item TODO: Multiple grading: |T r (Q d s)| or |Q d (T r s)|?
+  \begin{itemize}
+  \item tensors with rank containing quantities with dimensions?
+  \item or quantities with dimensions containing tensors with rank?
+  \item or \ldots{}
+  \end{itemize}
 \end{itemize}
-\subsubsection{{\bfseries\sffamily TODO} Library code and paper is work in progress (mostly in Idris).}
-\label{sec:org464cfe2}
-\subsubsection{{\bfseries\sffamily TODO} Multiple grading: |T r (Q d s)| or |Q d (T r s)|?}
-\label{sec:org77791a8}
-\begin{itemize}
-\item tensors with rank containing quantities with dimensions?
-\item or quantities with dimensions containing tensors with rank?
-\item or \ldots{}
-\end{itemize}
+\end{frame}
 \end{document}
