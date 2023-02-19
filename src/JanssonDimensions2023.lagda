@@ -1,13 +1,13 @@
 * Patrik Jansson: Dimension analysis and graded algebras
-+ Talk 2023-02-21
-+ at the [[https://ifipwg21wiki.cs.kuleuven.be/IFIP21/OnlineFeb23][online meeting]] of WG 2.1 on Algorithmic Languages and Calculi 
++ Prel. talk 2023-02-21
++ at the [[https://ifipwg21wiki.cs.kuleuven.be/IFIP21/OnlineFeb23][online meeting]] of WG 2.1 on Algorithmic Languages and Calculi
 + Joint work with Nicola Botta and Guilherme Silva.
 + Abstract:
   This talk describes work in progress aimed at understanding dimension analysis
   though coding it up using dependent types (in Agda). I will talk you through
   definitions of physical quantities, systems of units, dimensions, dimensional
   analysis, and an example of applying it to modelling a simple pendulum
-  experiment. 
+  experiment.
 + Some history: I did an Agda tutorial at the WG2.1 meeting #63 in Kyoto
   (in 2007) and I found mentions of Agda in 8 other physical meetings after
   that.
@@ -141,7 +141,7 @@ RealPlus3 = Vec Real 3
   the measured force |M*L/T^2| times bigger.
 ** Physics and dimensions
 + In an equation like |F = m * a| (force equals mass times
-  acceleration) in physics, the dimensions must match up: 
+  acceleration) in physics, the dimensions must match up:
   |dim F = dim (m * a)|.
 + Similarly for addition.
 + For multiplication we don't need to require matching
@@ -183,7 +183,7 @@ module Quantities (dimstuff : DimStuff) (S : Type) where
     field
       Q      : Dim -> Type
       dim    : Q d -> Dim
-             
+
       0Q     : Q d
       _+q_   : Q d  -> Q d  -> Q d
       scale  : S    -> Q d  -> Q d
