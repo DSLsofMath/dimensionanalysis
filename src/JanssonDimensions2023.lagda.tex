@@ -31,6 +31,7 @@
 % %format / = "\mathbin{/}"
 %format : = "\mathop{:}"
 %format -> = "\,\to\,"
+%format Type1 = Type "_1"
 \newcommand{\un}{\mbox{\texttt{\_}}}   % short underscore
 \newcommand{\unopun}[1]{\ensuremath{\,\un{#1}\un\,}}
 %format _≡_ = "\unopun{" ≡ "}"
@@ -209,7 +210,7 @@ RealPlus3 = Vec Real 3
   \frametitle{Physical quantities and systems of units}
 \begin{itemize}
 \item We can assign a ``dimension'' to each physical quantity:
-informally |dim : Q -> D| (later an indexed type |Q d|).
+informally |dim : Q -> D|
 \item Physical quantities like length, speed, force, etc. are usually
 measured with respect to a system of units of measurement, one unit
 per ``base dimension''.
@@ -217,12 +218,23 @@ per ``base dimension''.
 \pause
 \item These systems can be grouped into classes
 \begin{itemize}
-\item For geometry, just one base dimension of length is needed and the
-class is usually called just L.
+\item For geometry (the class L) we have just one base dimension of length.
 \item For kinematics (the class LT) we have a length and a time.
 \item For mechancics (the class LTM) we have length, time, and mass.
-\item Etc.
+\item Etc. (current, temperature, etc.)
 \end{itemize}
+% The seven SI base units:
+% | Quantity            | base unit |
+% |---------------------+-----------|
+% | time                | s         |
+% | length              | m         |
+% | mass                | kg        |
+% | electric current    | A         |
+% | temperature         | K         |
+% | amount of substance | mol       |
+% | luminous intensity  | cd        |
+\pause
+\item To make the most of dimension analysis, stay in as small a class as you can.
 \end{itemize}
 \end{frame}
 \begin{frame}
@@ -233,12 +245,14 @@ class is usually called just L.
   is |\ L T M -> L / T ^ 2|. The function describes how the measured
   value of the acceleration changes when we change the units of
   measurements.
+\pause
 \item My height (of dimension L) is measured to 1.78 in meters but 178 in
   cm.
 \item In general, if we make the unit of measurement L times smaller,
   we make the measured height L times bigger.
 \item The height is actually invariant, but the measured value changes
   in the opposite direction of the measuring rod.
+\pause
 \item This simplest (linear scaling) relation holds for quantities of
   one of the base dimensions, but changes if we move to derived
   dimensions like that for area or acceleration.
@@ -256,7 +270,8 @@ class is usually called just L.
 \begin{spec}
 dim F = dim (m * a)
 \end{spec}
-\item Similarly for addition.
+\item Similarly for addition: the dimensions of the operands must match.
+\pause
 \item For multiplication we don't need to require matching dimension:
   |dim| is a homomorphism: |dim (m * a) = dim m *d dim a|.
 \item Now, how do we type this? We clearly need to be able to multiply
@@ -266,6 +281,7 @@ dim F = dim (m * a)
 \end{frame}
 \begin{frame}
 \frametitle{DimStuff}
+We can capture the signature of what we need in a record type |DimStuff|.
 \begin{code}
 record DimStuff : Type1 where
   field
@@ -292,14 +308,14 @@ record DimStuff : Type1 where
 \begin{frame}
 \frametitle{Quantities indexed by dimensions}
 Then we need to make sure the type for ``quantities'' is indexed by
-dimensions. We assume a type for dimensions, and a type of
+dimensions. We assume a type for dimensions (|Dim|), and a type of
 scalars |S|.
 \begin{code}
 module Quantities (dimstuff : DimStuff) (S : Type) where
   open DimStuff dimstuff
 
   variable d d1 d2 : Dim
-  record Qstuff : Type1 where
+  record QStuff : Type1 where
     field
       Q     : Dim -> Type
       dim   : Q d -> Dim
@@ -310,7 +326,8 @@ module Quantities (dimstuff : DimStuff) (S : Type) where
 \end{code}
 \end{frame}
 \begin{frame}
-\frametitle{Quantities are almost a field}
+\frametitle{|QStuff| continued: a few more operations}
+Quantities form almost a field:
 \begin{code}
       q1    : Q Dimless
       _*q_  : Q d1 -> Q d2 -> Q (d1 *d d2)
@@ -334,7 +351,7 @@ operations performed on the quantities.
     _^q_ : Q d -> (i : ℤ) -> Q (d ^d i)
     s ^q  ( + n )  = s ^qn n
     s ^q -[1+ n ]  = q1 /q (s ^qn (suc n))
-  open Qstuff
+  open QStuff
 \end{code}
 %endif
 \end{frame}
@@ -419,9 +436,9 @@ The |Q| record type: just a wrapper around a scalar value:
 %if allCode
 \subsubsection{Skip (module end, open)}
 \begin{code}
-  qstuff : Qstuff
+  qstuff : QStuff
   qstuff = record { LTMQ }
-  open Qstuff qstuff
+  open QStuff qstuff
 \end{code}
 %endif
 
@@ -430,8 +447,8 @@ The |Q| record type: just a wrapper around a scalar value:
 \frametitle{Discussion: field or not a field?}
 
 For the scalars we need an underlying field |S| and we get a field
-back for |Q Dimless| but not for |Q d| for other |d|. But we get (yet
-another) example of an indexed structure: an indexed, or graded, field.
+back for |Q Dimless| but not for |Q d| for other |d|. But we get an
+example of an indexed structure: an indexed, or graded, field.
 
 \pause
 Example of why |Q L| is not a field: the multiplication operation
@@ -496,7 +513,7 @@ module Examples where
   open LTM Real rfReal
   open LTMDim using (L; T; M)
   open DimStuff dimstuff
-  open Qstuff qstuff using (_^q_)
+  open QStuff qstuff using (_^q_)
   open LTMQ
 \end{code}
 %endif
@@ -579,10 +596,12 @@ from the other four parameters.
   can be simplified significantly.
 \item First, pick three quantities of independent dimension: here |m|,
   |x|, |t|.
+\pause
 \item Second, make the remaining quantities dimensionless by combining
   them with monomials in the first three.
 \item Here |theta| is already dimensionless, but |g = gravity m x
   theta t| is replaced by |a = g *q (t ^q ℤ2) /q x : Q Dimless|.
+\pause
 \item Finally, the function |gravity| is factored into a function
   |acc| from just |theta| to |a|, and a monomial factor used to
   translate back to a quantity of the correct dimension.
