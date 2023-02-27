@@ -627,7 +627,7 @@ from the other four parameters.
 
 \begin{code}
   twoPiSq : Q Dimless
-  acc theta = twoPiSq
+  acc theta = twoPiSq        -- for small |theta|
 
   twoPiSq = scaleq 39.5 q1
 \end{code}
@@ -641,7 +641,7 @@ from the other four parameters.
   dimensions.
 \item Other example: tensors are graded by their order
 \item Library code and paper is work in progress (mostly in Idris).
-\item Multiple grading: |T r (Q d s)| or |Q d (T r s)|?
+\item Multiple grading: |T ord (Q dim s)| or |Q dim (T ord s)|?
   \begin{itemize}
   \item tensors with rank containing quantities with dimensions?
   \item or quantities with dimensions containing tensors with rank?
