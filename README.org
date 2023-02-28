@@ -1,4 +1,8 @@
 * Patrik Jansson: Dimension analysis and graded algebras
+** 2023-02 WG2.1 online meeting talk
++ [[file:src/JanssonDimensions2023.lagda.tex][Source file]]
++ [[https://youtu.be/EKgkB-is4VY][YouTube video]]
+** 2022-11 Agda-meeting talk
 + Talk 2022-11-11 [[https://www.youtube.com/watch?v=a3ily1F3zyA][YouTube video]]
 + at the Agda meeting in Edinburgh.
 + Joint work with Nicola Botta and Guilherme Silva.
