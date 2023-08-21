@@ -1,4 +1,12 @@
 * Patrik Jansson: Dimension analysis and graded algebras
+** 2023-08 Paper submission
++ New pre-print on arXiv (and submitted to JFP):
+  + Title: "Types, equations, dimensions and the Pi theorem"
+  + Authors: N. Botta, P. Jansson, G. da Silva
+  + Blog post: http://patrikja.owlstown.net/posts/1796
+  + arXiv: https://arxiv.org/abs/2308.09481
++ Abstract: The languages of mathematical physics and modelling are endowed with a rich “grammar of dimensions” that common abstractions of programming languages fail to represent. We propose a dependently typed domain-speciﬁc language (embedded in Idris) that captures this grammar. We apply it to explain basic notions of dimensional analysis and Buckingham’s Pi theorem. We hope that the language makes mathematical physics more accessible to computer scientists and functional programming more palatable to modelers and physicists.
++ I have talked about some aspects of the work earlier, and written about it in the post "Dimension analysis and graded algebras" ( https://patrikja.owlstown.net/posts/1385 ).
 ** 2023-02 WG2.1 online meeting talk
 + [[file:src/JanssonDimensions2023.lagda.tex][Source file]]
 + [[https://youtu.be/EKgkB-is4VY][YouTube video]]
