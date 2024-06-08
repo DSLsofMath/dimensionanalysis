@@ -130,7 +130,7 @@ Integer = ℤ
 \begin{code}
 import Algebra
 Ring = Algebra.Ring lzero lzero
-open import Data.Nat hiding (_^_) renaming (ℕ to Nat; _+_ to _+n_; _*_ to _*n_)
+open import Data.Nat hiding (_^_; _/_) renaming (ℕ to Nat; _+_ to _+n_; _*_ to _*n_)
 open import Data.Vec renaming (foldr to depFoldr)
 foldr : ∀ {A : Type} {B : Type} {m} →
         (A → B → B) → B → Vec A m → B
@@ -651,3 +651,46 @@ from the other four parameters.
 \end{itemize}
 \end{frame}
 \end{document}
+
+Some experiments with numeric literals.
+\begin{code}
+module NumLitExperiment where
+  -- Natural literals work "out of the box"
+  n : Nat
+  n = 3
+
+  -- And they can be used with the (smart) constructor +_ to build
+  -- integers.
+  z5 : ℤ
+  z5 = + 5
+
+  -- With the "FromNat" builtin, the number literals can also be used
+  -- for integers directly.
+  open import Agda.Builtin.FromNat
+  import Data.Integer.Literals
+  import Data.Unit -- needed for the (trivial) constraint
+  instance
+    _ = Data.Integer.Literals.number
+
+  z6 : ℤ
+  z6 = 6
+
+  -- And we can also do the same for (embed naturals as) rationals:
+  open import Data.Rational
+
+  import Data.Rational.Literals
+  instance
+    _ = Data.Rational.Literals.number
+
+  q3 : ℚ
+  q3 = 3
+
+  -- To express proper rationals we also need the FromNat machinery
+  -- for the naturals (I'm not sure why).
+  import Data.Nat.Literals
+  instance
+    _ = Data.Nat.Literals.number
+
+  pointnine : ℚ
+  pointnine = 9 / 10
+\end{code}
