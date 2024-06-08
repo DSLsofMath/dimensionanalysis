@@ -102,7 +102,8 @@ that.
 %if allCode
 \subsection{Agda version etc.}
 \begin{itemize}
-\item This file loads in Agda 2.6.2.2 with Agda stdlib-1.7
+%Old: This file loads in Agda 2.6.2.2 with Agda stdlib-1.7
+\item This file loads in Agda 2.6.4.1 with Agda stdlib-2.0
 \item It is a literate Agda file with embedded LaTeX code.
 \end{itemize}
 %endif
@@ -140,7 +141,7 @@ module VectScope (r : Ring) where
   open Algebra.Ring r
 
   0v : {n : Nat} -> Vec A n
-  0v = replicate 0#
+  0v {n} = replicate n 0#
 
   _+v_  :  {n : Nat} ->
            Vec A n -> Vec A n -> Vec A n

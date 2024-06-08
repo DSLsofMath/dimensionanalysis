@@ -7,7 +7,8 @@
 This talk describes work in progress aimed at understanding dimension
 analysis though coding it up using dependent types.
 ** Agda version etc.
-+ This file loads in Agda 2.6.2.2 with Agda stdlib-1.7
++ (Old: This file loads in Agda 2.6.2.2 with Agda stdlib-1.7)
++ This file loads in Agda 2.6.4.1 with Agda stdlib-2.0
 + It is a literate Agda file with emacs org-mode syntax for outlining.
 ** Skip some imports and setup
 *** Basic imports: equality, integers
@@ -34,7 +35,7 @@ module VectScope (r : Ring) where
   open Algebra.Ring r
 
   0v : {n : Nat} -> Vec C n
-  0v = replicate 0#
+  0v {n} = replicate n 0#
 
   _+v_  :  {n : Nat} ->
           Vec C n -> Vec C n -> Vec C n
